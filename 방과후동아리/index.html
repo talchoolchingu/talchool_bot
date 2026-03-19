@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>방과후 동아리</title>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4BWNYW5RX0"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());gtag('config','G-4BWNYW5RX0');
+function trackEvent(name,params){try{gtag('event',name,params||{});}catch(e){}}
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -661,6 +668,8 @@ class Game {
     generateNoise();
     this.updateHintCounter();
     document.getElementById('hint-counter').style.display='block';
+    this.startTime=Date.now();
+    trackEvent('game_start',{game:'방과후동아리'});
     this.goStage(1);
   }
   updateHintCounter(){
@@ -672,6 +681,7 @@ class Game {
   useHint(){
     const sol=this.solutions.find(s=>s.stage===this.currentStage);
     if(!sol){this.ui.showDialog('','이 장면에서는 힌트를 사용할 수 없습니다.');return;}
+    trackEvent('hint_used',{game:'방과후동아리',stage:this.currentStage,hints_left:this.hintsLeft});
     if(this.hintUsedStages.has(this.currentStage)){
       // Already used hint for this stage, show without deducting
       const modal=document.getElementById('hint-modal');
@@ -730,6 +740,9 @@ class Game {
   }
   goStage(n){
     this.currentStage=n;
+    const stageNames={1:'동아리실',2:'교실',3:'도서관',4:'체육관창고',5:'보일러실',6:'교무실',7:'옥상',8:'해피엔딩',9:'공포엔딩',10:'히든엔딩'};
+    trackEvent('stage_enter',{game:'방과후동아리',stage:n,stage_name:stageNames[n]||'unknown'});
+    if(n>=8) trackEvent('ending_reached',{game:'방과후동아리',ending:stageNames[n],play_time_sec:Math.round((Date.now()-(this.startTime||Date.now()))/1000)});
     this.audio.stopAmbient();
     this.effects.stopGlitch();
     this.setAtmosphere(Math.min(n,8));
